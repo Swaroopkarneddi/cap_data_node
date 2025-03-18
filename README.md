@@ -64,10 +64,20 @@ http://localhost:5000
   Example: `GET /leetcode/swaroop`
 
 - **Get LeetCode Contest Info:**
+
   ```
   GET /leetcode/contest/:username
   ```
+
   Example: `GET /leetcode/contest/swaroop`
+
+  - **Get LeetCode last 20 problems Info:**
+
+  ```
+  GET /leetcode/last20Sub/:username
+  ```
+
+  Example: `GET /leetcode/last20Sub/swaroop`
 
 ### Codeforces
 

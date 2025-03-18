@@ -31,6 +31,31 @@ app.get("/leetcode/:username", async (req, res) => {
   }
 });
 
+app.get("/leetcode/last20Sub/:username", async (req, res) => {
+  const { username } = req.params;
+  const limit = 20;
+  const query = `
+    query recentAcSubmissions($username: String!, $limit: Int!) {
+  recentAcSubmissionList(username: $username, limit: $limit) {
+    id
+    title
+    titleSlug
+    timestamp
+  }
+}
+  `;
+
+  try {
+    const response = await axios.post("https://leetcode.com/graphql", {
+      query,
+      variables: { username, limit },
+    });
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get("/leetcode/contest/:username", async (req, res) => {
   const { username } = req.params;
   const query = `
