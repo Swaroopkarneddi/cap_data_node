@@ -31,6 +31,42 @@ app.get("/leetcode/:username", async (req, res) => {
   }
 });
 
+// get calender data
+
+app.get("/leetcode/submissioncal/:username", async (req, res) => {
+  const { username } = req.params;
+  const query = `
+    query userProfileCalendar($username: String!, $year: Int) {
+  matchedUser(username: $username) {
+    userCalendar(year: $year) {
+      activeYears
+      streak
+      totalActiveDays
+      dccBadges {
+        timestamp
+        badge {
+          name
+          icon
+        }
+      }
+      submissionCalendar
+    }
+  }
+}
+  `;
+
+  try {
+    const response = await axios.post("https://leetcode.com/graphql", {
+      query,
+      variables: { username },
+    });
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+//get last 20 submissions
 app.get("/leetcode/last20Sub/:username", async (req, res) => {
   const { username } = req.params;
   const limit = 20;
