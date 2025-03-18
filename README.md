@@ -1,67 +1,108 @@
-Competitive Programming API
+# Competitive Programming API
 
 This is a simple Express.js API that fetches user data from LeetCode and Codeforces using their public APIs. It provides endpoints to retrieve user profiles, contest rankings, submissions, and solved problems.
 
-Features
+## Features
 
-Fetch LeetCode user profile and submission statistics.
+- Fetch LeetCode user profile and submission statistics.
+- Fetch LeetCode contest rankings and history.
+- Fetch Codeforces user profile and rating history.
+- Fetch Codeforces contests and recent submissions.
+- Fetch Codeforces solved problems.
 
-Fetch LeetCode contest rankings and history.
+## Installation & Setup
 
-Fetch Codeforces user profile and rating history.
+### Prerequisites
 
-Fetch Codeforces contests and recent submissions.
+- **Node.js** (Ensure Node.js is installed)
+- **npm** (Comes with Node.js)
 
-Fetch Codeforces solved problems.
+### Steps to Install and Run
 
-Installation & Setup
+#### Clone the repository:
 
-Prerequisites
-
-Node.js (Ensure Node.js is installed)
-
-npm (Comes with Node.js)
-
-Steps to Install and Run
-
-Clone the repository:
-
+```sh
 git clone https://github.com/your-username/competitive-programming-api.git
 cd competitive-programming-api
+```
 
-Install dependencies:
+#### Install dependencies:
 
+```sh
 npm install
+```
 
-Start the server:
+#### Start the server:
 
+```sh
 node index.js
+```
 
-or (if using nodemon for auto-reloading)
+or (if using nodemon for auto-reloading):
 
+```sh
 npm install -g nodemon
 nodemon index.js
+```
 
 The server will run at:
 
+```
 http://localhost:5000
+```
 
-API Endpoints
+## API Endpoints
 
-LeetCode
+### LeetCode
 
-Get LeetCode Profile:GET /leetcode/:usernameExample: GET /leetcode/swaroop
+- **Get LeetCode Profile:**
 
-Get LeetCode Contest Info:GET /leetcode/contest/:usernameExample: GET /leetcode/contest/swaroop
+  ```
+  GET /leetcode/:username
+  ```
 
-Codeforces
+  Example: `GET /leetcode/swaroop`
 
-Get Codeforces Profile:GET /codeforces/:usernameExample: GET /codeforces/tourist
+- **Get LeetCode Contest Info:**
+  ```
+  GET /leetcode/contest/:username
+  ```
+  Example: `GET /leetcode/contest/swaroop`
 
-Get Codeforces Rating History:GET /codeforces/rating/:usernameExample: GET /codeforces/rating/tourist
+### Codeforces
 
-Get Codeforces Contests:GET /codeforces/contests
+- **Get Codeforces Profile:**
 
-Get Codeforces Submissions:GET /codeforces/submissions/:usernameExample: GET /codeforces/submissions/tourist
+  ```
+  GET /codeforces/:username
+  ```
 
-Get Codeforces Solved Problems:GET /codeforces/solved/:usernameExample: GET /codeforces/solved/tourist
+  Example: `GET /codeforces/tourist`
+
+- **Get Codeforces Rating History:**
+
+  ```
+  GET /codeforces/rating/:username
+  ```
+
+  Example: `GET /codeforces/rating/tourist`
+
+- **Get Codeforces Contests:**
+
+  ```
+  GET /codeforces/contests
+  ```
+
+- **Get Codeforces Submissions:**
+
+  ```
+  GET /codeforces/submissions/:username
+  ```
+
+  Example: `GET /codeforces/submissions/tourist`
+
+- **Get Codeforces Solved Problems:**
+  ```
+  GET /codeforces/solved/:username
+  ```
+  Example: `GET /codeforces/solved/tourist`
