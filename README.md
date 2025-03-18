@@ -71,7 +71,7 @@ http://localhost:5000
 
   Example: `GET /leetcode/contest/swaroop`
 
-  - **Get LeetCode last 20 problems Info:**
+- **Get LeetCode last 20 problems Info:**
 
   ```
   GET /leetcode/last20Sub/:username
