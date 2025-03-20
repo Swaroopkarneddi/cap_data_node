@@ -1,5 +1,3 @@
-Here's the content converted into `.md` format:
-
 ````markdown
 # Code Statistics API
 
