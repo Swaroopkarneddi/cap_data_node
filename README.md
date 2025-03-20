@@ -1,126 +1,145 @@
-# Competitive Programming API
+Here's the content converted into `.md` format:
 
-This is a simple Express.js API that fetches user data from LeetCode and Codeforces using their public APIs. It provides endpoints to retrieve user profiles, contest rankings, submissions, and solved problems.
+````markdown
+# Code Statistics API
 
-## Features
+This project provides an API that fetches statistics for programming platforms such as **LeetCode** and **Codeforces**. It allows fetching user statistics, submission history, contest data, and more.
 
-- Fetch LeetCode user profile and submission statistics.
-- Fetch LeetCode contest rankings and history.
-- Fetch Codeforces user profile and rating history.
-- Fetch Codeforces contests and recent submissions.
-- Fetch Codeforces solved problems.
+## Technologies Used
 
-## Installation & Setup
+- **Node.js** (Backend Framework)
+- **Express** (API Framework)
+- **Axios** (HTTP Client for API Requests)
+- **GraphQL** (For LeetCode queries)
+
+## Setup
 
 ### Prerequisites
 
-- **Node.js** (Ensure Node.js is installed)
-- **npm** (Comes with Node.js)
+Before you start, make sure you have the following installed:
 
-### Steps to Install and Run
+- **Node.js** (LTS version is recommended)
+- **npm** (Node Package Manager)
 
-#### Clone the repository:
+### Steps to Set Up
 
-```sh
-git clone https://github.com/your-username/competitive-programming-api.git
-cd competitive-programming-api
-```
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd <repository-directory>
+   ```
+````
 
-#### Install dependencies:
+2. Install the dependencies:
 
-```sh
-npm install
-```
+   ```bash
+   npm install
+   ```
 
-#### Start the server:
+3. Start the server:
 
-```sh
-node index.js
-```
+   ```bash
+   npm start
+   ```
 
-or (if using nodemon for auto-reloading):
-
-```sh
-npm install -g nodemon
-nodemon index.js
-```
-
-The server will run at:
-
-```
-http://localhost:5000
-```
+   The server will be running at `http://localhost:5000`.
 
 ## API Endpoints
 
-### LeetCode
+### LeetCode Routes
 
-- **Get LeetCode Profile:**
+- **/leetcode/:username**  
+  Method: `GET`  
+  Description: Fetches statistics for a given LeetCode user.  
+  Response: LeetCode user statistics, including submission numbers for different difficulties.
 
+- **/leetcode/submissioncal/:username**  
+  Method: `GET`  
+  Description: Fetches the LeetCode user submission calendar.  
+  Response: Calendar of user submissions, streaks, badges, and activity.
+
+- **/leetcode/last20Sub/:username**  
+  Method: `GET`  
+  Description: Fetches the last 20 submissions of the user on LeetCode.  
+  Response: List of the last 20 submissions.
+
+- **/leetcode/contest/:username**  
+  Method: `GET`  
+  Description: Fetches contest data for the user.  
+  Response: User contest data, including rankings, attended contests, and rating.
+
+- **/leetcode/attendedContest/:username**  
+  Method: `GET`  
+  Description: Fetches attended contest data for the user on LeetCode.  
+  Response: Attended contest data, including ranking and performance.
+
+### Codeforces Routes
+
+- **/codeforces/:username**  
+  Method: `GET`  
+  Description: Fetches Codeforces user information.  
+  Response: Codeforces user details.
+
+- **/codeforces/contests**  
+  Method: `GET`  
+  Description: Fetches a list of available contests on Codeforces.  
+  Response: List of available contests.
+
+- **/codeforces/rating/:username**  
+  Method: `GET`  
+  Description: Fetches rating history for a user on Codeforces.  
+  Response: Codeforces rating history.
+
+- **/codeforces/submissions/:username**  
+  Method: `GET`  
+  Description: Fetches submission history for a user on Codeforces.  
+  Response: List of submissions made by the user.
+
+- **/codeforces/solved/:username**  
+  Method: `GET`  
+  Description: Fetches a list of problems solved by a user on Codeforces.  
+  Response: List of problems that the user has solved.
+
+### All Data Route
+
+- **/alldata/:leetcodeId/:codeforcesId**  
+  Method: `GET`  
+  Description: Fetches combined data from both LeetCode and Codeforces for a given user.  
+  Response: Combined statistics for LeetCode and Codeforces.
+
+## Example Requests
+
+### LeetCode Example
+
+- Fetch user stats:
+
+  ```http
+  GET http://localhost:5000/leetcode/johndoe
   ```
-  GET /leetcode/:username
+
+- Fetch the last 20 submissions for the user:
+  ```http
+  GET http://localhost:5000/leetcode/last20Sub/johndoe
   ```
 
-  Example: `GET /leetcode/swaroop`
+### Codeforces Example
 
-- **Get LeetCode calander Info:**
+- Fetch user information:
 
-  ```
-  GET /leetcode/submissioncal/:username
-  ```
-
-  Example: `GET /leetcode/submissioncal/swaroop`
-
-- **Get LeetCode Contest Info:**
-
-  ```
-  GET /leetcode/contest/:username
+  ```http
+  GET http://localhost:5000/codeforces/johndoe
   ```
 
-  Example: `GET /leetcode/contest/swaroop`
-
-- **Get LeetCode last 20 problems Info:**
-
-  ```
-  GET /leetcode/last20Sub/:username
+- Fetch the user's rating history:
+  ```http
+  GET http://localhost:5000/codeforces/rating/johndoe
   ```
 
-  Example: `GET /leetcode/last20Sub/swaroop`
+## Error Handling
 
-### Codeforces
+If an error occurs while fetching data from the APIs, the response will return an error message with a 500 status code.
 
-- **Get Codeforces Profile:**
+```
 
-  ```
-  GET /codeforces/:username
-  ```
-
-  Example: `GET /codeforces/tourist`
-
-- **Get Codeforces Rating History:**
-
-  ```
-  GET /codeforces/rating/:username
-  ```
-
-  Example: `GET /codeforces/rating/tourist`
-
-- **Get Codeforces Contests:**
-
-  ```
-  GET /codeforces/contests
-  ```
-
-- **Get Codeforces Submissions:**
-
-  ```
-  GET /codeforces/submissions/:username
-  ```
-
-  Example: `GET /codeforces/submissions/tourist`
-
-- **Get Codeforces Solved Problems:**
-  ```
-  GET /codeforces/solved/:username
-  ```
-  Example: `GET /codeforces/solved/tourist`
+This Markdown file contains the entire setup and API details, ready for use in a repository or documentation.
+```
