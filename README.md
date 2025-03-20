@@ -105,6 +105,11 @@ Before you start, make sure you have the following installed:
   Description: Fetches combined data from both LeetCode and Codeforces for a given user.  
   Response: Combined statistics for LeetCode and Codeforces.
 
+- **/alldata/ov/:leetcodeId/:codeforcesId**  
+  Method: `GET`  
+  Description: Fetches combined data from both LeetCode and Codeforces for a given user and also gives the clubed ranking and rating.  
+  Response: Combined statistics for LeetCode and Codeforces with combined ranking and rating.
+
 ## Example Requests
 
 ### LeetCode Example
