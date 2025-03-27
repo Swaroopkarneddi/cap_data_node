@@ -5,6 +5,7 @@ const {
   getLeetCodeLast20Submissions,
   getLeetCodeContestData,
   getAttendedLeetcodeContestData,
+  getLeetCodeCalendardata,
 } = require("../controllers/leetcodeController");
 
 const router = express.Router();
@@ -13,6 +14,7 @@ router.get("/:username", getLeetCodeStats);
 router.get("/submissioncal/:username", getLeetCodeCalendar);
 router.get("/last20Sub/:username", getLeetCodeLast20Submissions);
 router.get("/contest/:username", getLeetCodeContestData);
+router.get("/calenderOnly/:username", getLeetCodeCalendardata);
 // router.get("/attendedContest/:username", getAttendedLeetcodeContestData);
 router.get("/attendedContest/:username", async (req, res) => {
   try {

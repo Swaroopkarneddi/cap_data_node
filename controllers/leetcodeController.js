@@ -54,6 +54,194 @@ const getLeetCodeCalendar = async (req, res) => {
   }
 };
 
+// const getLeetCodeCalendardata = async (req, res) => {
+//   const { username } = req.params;
+//   const query = `
+//     query userProfileCalendar($username: String!, $year: Int) {
+//       matchedUser(username: $username) {
+//         userCalendar(year: $year) {
+//           submissionCalendar
+//         }
+//       }
+//     }`;
+
+//   try {
+//     const response = await axios.post("https://leetcode.com/graphql", {
+//       query,
+//       variables: { username },
+//     });
+//     res.json(response.data);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+// const axios = require("axios");
+
+// const getLeetCodeCalendardata = async (req, res) => {
+//   const { username } = req.params;
+//   const query = `
+//     query userProfileCalendar($username: String!, $year: Int) {
+//       matchedUser(username: $username) {
+//         userCalendar(year: $year) {
+//           activeYears
+//           streak
+//           totalActiveDays
+//           submissionCalendar
+//         }
+//       }
+//     }`;
+
+//   try {
+//     const response = await axios.post("https://leetcode.com/graphql", {
+//       query,
+//       variables: { username },
+//     });
+
+//     const calendarData = response.data.data.matchedUser.userCalendar;
+//     const submissionCalendar = JSON.parse(calendarData.submissionCalendar);
+
+//     // Convert timestamps to Date objects and organize them by month
+//     const months = [
+//       "Jan",
+//       "Feb",
+//       "Mar",
+//       "Apr",
+//       "May",
+//       "Jun",
+//       "Jul",
+//       "Aug",
+//       "Sep",
+//       "Oct",
+//       "Nov",
+//       "Dec",
+//     ];
+//     const daysInMonth = {
+//       Jan: 31,
+//       Feb: 28,
+//       Mar: 31,
+//       Apr: 30,
+//       May: 31,
+//       Jun: 30,
+//       Jul: 31,
+//       Aug: 31,
+//       Sep: 30,
+//       Oct: 31,
+//       Nov: 30,
+//       Dec: 31,
+//     };
+
+//     const formattedData = {
+//       totalSubmissions: Object.values(submissionCalendar).reduce(
+//         (a, b) => a + b,
+//         0
+//       ),
+//       totalActiveDays: calendarData.totalActiveDays,
+//       maxStreak: calendarData.streak,
+//       months: months.map((month, index) => {
+//         const monthIndex = index + 1;
+//         const daysArray = Array.from(
+//           { length: daysInMonth[month] },
+//           (_, day) => {
+//             const date = new Date(
+//               `${monthIndex}-${day + 1}-${new Date().getFullYear()}`
+//             );
+//             const timestamp = Math.floor(date.getTime() / 1000); // Convert to UNIX timestamp
+//             return { submissions: submissionCalendar[timestamp] || 0 };
+//           }
+//         );
+//         return { name: month, days: daysArray };
+//       }),
+//     };
+
+//     res.json(formattedData);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+const getLeetCodeCalendardata = async (req, res) => {
+  const { username } = req.params;
+  const query = `
+    query userProfileCalendar($username: String!, $year: Int) {
+      matchedUser(username: $username) {
+        userCalendar(year: $year) {
+          submissionCalendar
+        }
+      }
+    }`;
+
+  try {
+    const response = await axios.post("https://leetcode.com/graphql", {
+      query,
+      variables: { username },
+    });
+
+    const submissionCalendar = JSON.parse(
+      response.data.data.matchedUser.userCalendar.submissionCalendar
+    );
+
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const oneYearAgoTimestamp = currentTimestamp - 365 * 24 * 60 * 60;
+
+    const filteredData = Object.entries(submissionCalendar).filter(
+      ([timestamp]) => timestamp >= oneYearAgoTimestamp
+    );
+
+    let totalSubmissions = 0;
+    let totalActiveDays = 0;
+    let maxStreak = 0;
+    let currentStreak = 0;
+
+    const months = Array(12)
+      .fill(null)
+      .map((_, index) => {
+        const monthDate = new Date();
+        monthDate.setMonth(monthDate.getMonth() - (11 - index));
+
+        const daysInMonth = new Date(
+          monthDate.getFullYear(),
+          monthDate.getMonth() + 1,
+          0
+        ).getDate();
+
+        const days = Array(daysInMonth).fill({ submissions: 0 });
+
+        filteredData.forEach(([timestamp, submissions]) => {
+          const date = new Date(Number(timestamp) * 1000);
+          if (
+            date.getMonth() === monthDate.getMonth() &&
+            date.getFullYear() === monthDate.getFullYear()
+          ) {
+            days[date.getDate() - 1] = { submissions };
+            totalSubmissions += submissions;
+            totalActiveDays++;
+            currentStreak++;
+            maxStreak = Math.max(maxStreak, currentStreak);
+          } else {
+            currentStreak = 0;
+          }
+        });
+
+        return {
+          name: monthDate.toLocaleString("en-US", { month: "short" }),
+          days,
+        };
+      });
+
+    const dummyData = {
+      totalSubmissions,
+      totalActiveDays,
+      maxStreak,
+      months,
+    };
+
+    res.json(dummyData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const getLeetCodeLast20Submissions = async (req, res) => {
   const { username } = req.params;
   const limit = 20;
@@ -163,4 +351,5 @@ module.exports = {
   getLeetCodeLast20Submissions,
   getLeetCodeContestData,
   getAttendedLeetcodeContestData,
+  getLeetCodeCalendardata,
 };
