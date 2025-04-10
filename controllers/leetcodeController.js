@@ -11,7 +11,7 @@ const getLeetCodeStats = async (req, res) => {
           count
           submissions
         }
-      }
+      } 
     }
   }`;
 
@@ -70,91 +70,67 @@ const getLeetCodeCalendar = async (req, res) => {
 //       query,
 //       variables: { username },
 //     });
-//     res.json(response.data);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
 
-// const axios = require("axios");
+//     const submissionCalendar = JSON.parse(
+//       response.data.data.matchedUser.userCalendar.submissionCalendar
+//     );
 
-// const getLeetCodeCalendardata = async (req, res) => {
-//   const { username } = req.params;
-//   const query = `
-//     query userProfileCalendar($username: String!, $year: Int) {
-//       matchedUser(username: $username) {
-//         userCalendar(year: $year) {
-//           activeYears
-//           streak
-//           totalActiveDays
-//           submissionCalendar
-//         }
-//       }
-//     }`;
+//     const currentTimestamp = Math.floor(Date.now() / 1000);
+//     const oneYearAgoTimestamp = currentTimestamp - 365 * 24 * 60 * 60;
 
-//   try {
-//     const response = await axios.post("https://leetcode.com/graphql", {
-//       query,
-//       variables: { username },
-//     });
+//     const filteredData = Object.entries(submissionCalendar).filter(
+//       ([timestamp]) => timestamp >= oneYearAgoTimestamp
+//     );
 
-//     const calendarData = response.data.data.matchedUser.userCalendar;
-//     const submissionCalendar = JSON.parse(calendarData.submissionCalendar);
+//     let totalSubmissions = 0;
+//     let totalActiveDays = 0;
+//     let maxStreak = 0;
+//     let currentStreak = 0;
 
-//     // Convert timestamps to Date objects and organize them by month
-//     const months = [
-//       "Jan",
-//       "Feb",
-//       "Mar",
-//       "Apr",
-//       "May",
-//       "Jun",
-//       "Jul",
-//       "Aug",
-//       "Sep",
-//       "Oct",
-//       "Nov",
-//       "Dec",
-//     ];
-//     const daysInMonth = {
-//       Jan: 31,
-//       Feb: 28,
-//       Mar: 31,
-//       Apr: 30,
-//       May: 31,
-//       Jun: 30,
-//       Jul: 31,
-//       Aug: 31,
-//       Sep: 30,
-//       Oct: 31,
-//       Nov: 30,
-//       Dec: 31,
-//     };
+//     const months = Array(12)
+//       .fill(null)
+//       .map((_, index) => {
+//         const monthDate = new Date();
+//         monthDate.setMonth(monthDate.getMonth() - (11 - index));
 
-//     const formattedData = {
-//       totalSubmissions: Object.values(submissionCalendar).reduce(
-//         (a, b) => a + b,
-//         0
-//       ),
-//       totalActiveDays: calendarData.totalActiveDays,
-//       maxStreak: calendarData.streak,
-//       months: months.map((month, index) => {
-//         const monthIndex = index + 1;
-//         const daysArray = Array.from(
-//           { length: daysInMonth[month] },
-//           (_, day) => {
-//             const date = new Date(
-//               `${monthIndex}-${day + 1}-${new Date().getFullYear()}`
-//             );
-//             const timestamp = Math.floor(date.getTime() / 1000); // Convert to UNIX timestamp
-//             return { submissions: submissionCalendar[timestamp] || 0 };
+//         const daysInMonth = new Date(
+//           monthDate.getFullYear(),
+//           monthDate.getMonth() + 1,
+//           0
+//         ).getDate();
+
+//         const days = Array(daysInMonth).fill({ submissions: 0 });
+
+//         filteredData.forEach(([timestamp, submissions]) => {
+//           const date = new Date(Number(timestamp) * 1000);
+//           if (
+//             date.getMonth() === monthDate.getMonth() &&
+//             date.getFullYear() === monthDate.getFullYear()
+//           ) {
+//             days[date.getDate() - 1] = { submissions };
+//             totalSubmissions += submissions;
+//             totalActiveDays++;
+//             currentStreak++;
+//             maxStreak = Math.max(maxStreak, currentStreak);
+//           } else {
+//             currentStreak = 0;
 //           }
-//         );
-//         return { name: month, days: daysArray };
-//       }),
+//         });
+
+//         return {
+//           name: monthDate.toLocaleString("en-US", { month: "short" }),
+//           days,
+//         };
+//       });
+
+//     const dummyData = {
+//       totalSubmissions,
+//       totalActiveDays,
+//       maxStreak,
+//       months,
 //     };
 
-//     res.json(formattedData);
+//     res.json(dummyData);
 //   } catch (error) {
 //     res.status(500).json({ error: error.message });
 //   }
@@ -184,59 +160,71 @@ const getLeetCodeCalendardata = async (req, res) => {
     const currentTimestamp = Math.floor(Date.now() / 1000);
     const oneYearAgoTimestamp = currentTimestamp - 365 * 24 * 60 * 60;
 
-    const filteredData = Object.entries(submissionCalendar).filter(
-      ([timestamp]) => timestamp >= oneYearAgoTimestamp
-    );
+    // Filter and sort by timestamp
+    const filteredEntries = Object.entries(submissionCalendar)
+      .filter(([timestamp]) => Number(timestamp) >= oneYearAgoTimestamp)
+      .sort((a, b) => Number(a[0]) - Number(b[0]));
 
     let totalSubmissions = 0;
     let totalActiveDays = 0;
-    let maxStreak = 0;
     let currentStreak = 0;
+    let maxStreak = 0;
+    let prevDay = null;
 
-    const months = Array(12)
-      .fill(null)
-      .map((_, index) => {
-        const monthDate = new Date();
-        monthDate.setMonth(monthDate.getMonth() - (11 - index));
+    // ✅ Correct streak and summary calculation
+    filteredEntries.forEach(([timestamp, submissions]) => {
+      const date = new Date(Number(timestamp) * 1000);
+      const currentDay = Math.floor(date.getTime() / (1000 * 60 * 60 * 24));
+      totalSubmissions += submissions;
 
-        const daysInMonth = new Date(
-          monthDate.getFullYear(),
-          monthDate.getMonth() + 1,
-          0
-        ).getDate();
+      if (submissions > 0) {
+        totalActiveDays++;
 
-        const days = Array(daysInMonth).fill({ submissions: 0 });
+        if (prevDay !== null && currentDay === prevDay + 1) {
+          currentStreak++;
+        } else {
+          currentStreak = 1;
+        }
 
-        filteredData.forEach(([timestamp, submissions]) => {
-          const date = new Date(Number(timestamp) * 1000);
-          if (
-            date.getMonth() === monthDate.getMonth() &&
-            date.getFullYear() === monthDate.getFullYear()
-          ) {
-            days[date.getDate() - 1] = { submissions };
-            totalSubmissions += submissions;
-            totalActiveDays++;
-            currentStreak++;
-            maxStreak = Math.max(maxStreak, currentStreak);
-          } else {
-            currentStreak = 0;
-          }
-        });
+        maxStreak = Math.max(maxStreak, currentStreak);
+        prevDay = currentDay;
+      } else {
+        currentStreak = 0;
+      }
+    });
 
-        return {
-          name: monthDate.toLocaleString("en-US", { month: "short" }),
-          days,
-        };
+    // 📅 Build months array for visualization
+    const months = Array.from({ length: 12 }, (_, index) => {
+      const monthDate = new Date();
+      monthDate.setDate(1); // To avoid overflow on month ends
+      monthDate.setMonth(monthDate.getMonth() - (11 - index));
+
+      const year = monthDate.getFullYear();
+      const month = monthDate.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      const days = Array(daysInMonth).fill({ submissions: 0 });
+
+      filteredEntries.forEach(([timestamp, submissions]) => {
+        const date = new Date(Number(timestamp) * 1000);
+        if (date.getFullYear() === year && date.getMonth() === month) {
+          days[date.getDate() - 1] = { submissions };
+        }
       });
 
-    const dummyData = {
+      return {
+        name: monthDate.toLocaleString("en-US", { month: "short" }),
+        days,
+      };
+    });
+
+    // 📦 Final Response
+    res.json({
       totalSubmissions,
       totalActiveDays,
       maxStreak,
       months,
-    };
-
-    res.json(dummyData);
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
