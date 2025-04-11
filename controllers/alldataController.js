@@ -10,6 +10,14 @@ const getAllData = async (req, res) => {
       getCodeforcesRatingHistory(codeforcesId),
     ]);
 
+    if (!Array.isArray(leetcodeContests)) {
+      return res.status(404).json({ error: "Invalid LeetCode username" });
+    }
+
+    if (!Array.isArray(codeforcesRatingHistory)) {
+      return res.status(404).json({ error: "Invalid Codeforces username" });
+    }
+
     res.json({
       leetcodeAttendedContests: leetcodeContests,
       codeforcesRatingHistory: codeforcesRatingHistory,
@@ -28,18 +36,26 @@ const getOverallRanking = async (req, res) => {
       getCodeforcesRatingHistory(codeforcesId),
     ]);
 
+    if (!Array.isArray(leetcodeContests)) {
+      return res.status(404).json({ error: "Invalid LeetCode username" });
+    }
+
+    if (!Array.isArray(codeforcesRatingHistory)) {
+      return res.status(404).json({ error: "Invalid Codeforces username" });
+    }
+
     let totalRanking = 0;
     let totalRating = 0;
     let count = 0;
 
-    // Process LeetCode rankings and ratings
+    // Process LeetCode contests
     leetcodeContests.forEach((contest) => {
       totalRanking += contest.ranking;
       totalRating += contest.rating;
       count++;
     });
 
-    // Process Codeforces rankings and ratings
+    // Process Codeforces contests
     codeforcesRatingHistory.forEach((contest) => {
       totalRanking += contest.rank;
       totalRating += contest.newRating;

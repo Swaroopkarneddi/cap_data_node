@@ -19,6 +19,12 @@ const getLeetCodeStats = async (req, res) => {
     const response = await axios.post("https://leetcode.com/graphql", {
       query,
     });
+
+    const matchedUser = response.data.data.matchedUser;
+    if (!matchedUser) {
+      return res.status(404).json({ error: "Invalid LeetCode username" });
+    }
+
     res.json(response.data);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -48,93 +54,17 @@ const getLeetCodeCalendar = async (req, res) => {
       query,
       variables: { username },
     });
+
+    const matchedUser = response.data.data.matchedUser;
+    if (!matchedUser || !matchedUser.userCalendar) {
+      return res.status(404).json({ error: "Invalid LeetCode username" });
+    }
+
     res.json(response.data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-
-// const getLeetCodeCalendardata = async (req, res) => {
-//   const { username } = req.params;
-//   const query = `
-//     query userProfileCalendar($username: String!, $year: Int) {
-//       matchedUser(username: $username) {
-//         userCalendar(year: $year) {
-//           submissionCalendar
-//         }
-//       }
-//     }`;
-
-//   try {
-//     const response = await axios.post("https://leetcode.com/graphql", {
-//       query,
-//       variables: { username },
-//     });
-
-//     const submissionCalendar = JSON.parse(
-//       response.data.data.matchedUser.userCalendar.submissionCalendar
-//     );
-
-//     const currentTimestamp = Math.floor(Date.now() / 1000);
-//     const oneYearAgoTimestamp = currentTimestamp - 365 * 24 * 60 * 60;
-
-//     const filteredData = Object.entries(submissionCalendar).filter(
-//       ([timestamp]) => timestamp >= oneYearAgoTimestamp
-//     );
-
-//     let totalSubmissions = 0;
-//     let totalActiveDays = 0;
-//     let maxStreak = 0;
-//     let currentStreak = 0;
-
-//     const months = Array(12)
-//       .fill(null)
-//       .map((_, index) => {
-//         const monthDate = new Date();
-//         monthDate.setMonth(monthDate.getMonth() - (11 - index));
-
-//         const daysInMonth = new Date(
-//           monthDate.getFullYear(),
-//           monthDate.getMonth() + 1,
-//           0
-//         ).getDate();
-
-//         const days = Array(daysInMonth).fill({ submissions: 0 });
-
-//         filteredData.forEach(([timestamp, submissions]) => {
-//           const date = new Date(Number(timestamp) * 1000);
-//           if (
-//             date.getMonth() === monthDate.getMonth() &&
-//             date.getFullYear() === monthDate.getFullYear()
-//           ) {
-//             days[date.getDate() - 1] = { submissions };
-//             totalSubmissions += submissions;
-//             totalActiveDays++;
-//             currentStreak++;
-//             maxStreak = Math.max(maxStreak, currentStreak);
-//           } else {
-//             currentStreak = 0;
-//           }
-//         });
-
-//         return {
-//           name: monthDate.toLocaleString("en-US", { month: "short" }),
-//           days,
-//         };
-//       });
-
-//     const dummyData = {
-//       totalSubmissions,
-//       totalActiveDays,
-//       maxStreak,
-//       months,
-//     };
-
-//     res.json(dummyData);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
 
 const getLeetCodeCalendardata = async (req, res) => {
   const { username } = req.params;
@@ -153,14 +83,18 @@ const getLeetCodeCalendardata = async (req, res) => {
       variables: { username },
     });
 
+    const matchedUser = response?.data?.data?.matchedUser;
+    if (!matchedUser || !matchedUser.userCalendar) {
+      return res.status(404).json({ error: "Invalid LeetCode username" });
+    }
+
     const submissionCalendar = JSON.parse(
-      response.data.data.matchedUser.userCalendar.submissionCalendar
+      matchedUser.userCalendar.submissionCalendar
     );
 
     const currentTimestamp = Math.floor(Date.now() / 1000);
     const oneYearAgoTimestamp = currentTimestamp - 365 * 24 * 60 * 60;
 
-    // Filter and sort by timestamp
     const filteredEntries = Object.entries(submissionCalendar)
       .filter(([timestamp]) => Number(timestamp) >= oneYearAgoTimestamp)
       .sort((a, b) => Number(a[0]) - Number(b[0]));
@@ -171,7 +105,6 @@ const getLeetCodeCalendardata = async (req, res) => {
     let maxStreak = 0;
     let prevDay = null;
 
-    // ✅ Correct streak and summary calculation
     filteredEntries.forEach(([timestamp, submissions]) => {
       const date = new Date(Number(timestamp) * 1000);
       const currentDay = Math.floor(date.getTime() / (1000 * 60 * 60 * 24));
@@ -193,10 +126,9 @@ const getLeetCodeCalendardata = async (req, res) => {
       }
     });
 
-    // 📅 Build months array for visualization
     const months = Array.from({ length: 12 }, (_, index) => {
       const monthDate = new Date();
-      monthDate.setDate(1); // To avoid overflow on month ends
+      monthDate.setDate(1);
       monthDate.setMonth(monthDate.getMonth() - (11 - index));
 
       const year = monthDate.getFullYear();
@@ -218,7 +150,6 @@ const getLeetCodeCalendardata = async (req, res) => {
       };
     });
 
-    // 📦 Final Response
     res.json({
       totalSubmissions,
       totalActiveDays,
@@ -245,6 +176,11 @@ const getLeetCodeLast20Submissions = async (req, res) => {
       query,
       variables: { username, limit },
     });
+
+    if (!response.data.data.recentAcSubmissionList) {
+      return res.status(404).json({ error: "Invalid LeetCode username" });
+    }
+
     res.json(response.data);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -270,64 +206,39 @@ const getLeetCodeContestData = async (req, res) => {
       query,
       variables: { username },
     });
+
+    const data = response.data.data;
+    if (!data.userContestRanking && !data.userContestRankingHistory) {
+      return res.status(404).json({ error: "Invalid LeetCode username" });
+    }
+
     res.json(response.data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// const getAttendedLeetcodeContestData = async (username) => {
-//   const query = `
-//     query userContestRankingInfo($username: String!) {
-//       userContestRankingHistory(username: $username) {
-//         attended
-//         trendDirection
-//         problemsSolved
-//         totalProblems
-//         finishTimeInSeconds
-//         rating
-//         ranking
-//         contest {
-//           title
-//           startTime
-//         }
-//       }
-//     }
-//   `;
-
-//   try {
-//     const response = await axios.post("https://leetcode.com/graphql", {
-//       query,
-//       variables: { username },
-//     });
-
-//     const attendedContests =
-//       response.data.data.userContestRankingHistory.filter(
-//         (contest) => contest.attended === true
-//       );
-
-//     return attendedContests;
-//   } catch (error) {
-//     throw new Error(error.message);
-//   }
-// };
 const getAttendedLeetcodeContestData = async (username) => {
-  const query = `query userContestRankingInfo($username: String!) { 
-    userContestRankingHistory(username: $username) { 
-      attended trendDirection problemsSolved totalProblems finishTimeInSeconds rating ranking 
-      contest { title startTime } 
-    } 
-  }`;
+  const query = `
+    query userContestRankingInfo($username: String!) { 
+      userContestRankingHistory(username: $username) { 
+        attended trendDirection problemsSolved totalProblems finishTimeInSeconds rating ranking 
+        contest { title startTime } 
+      } 
+    }`;
 
   try {
     const response = await axios.post("https://leetcode.com/graphql", {
       query,
-      variables: { username }, // Use the passed `username`
+      variables: { username },
     });
 
-    return response.data.data.userContestRankingHistory.filter(
-      (contest) => contest.attended === true
-    );
+    const history = response.data.data.userContestRankingHistory;
+    if (!history) {
+      throw new Error("Invalid LeetCode username");
+    }
+
+    return history.filter((contest) => contest.attended === true);
   } catch (error) {
     throw new Error(error.message);
   }
