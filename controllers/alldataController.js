@@ -4,19 +4,18 @@ const { getCodeforcesRatingHistory } = require("./codeforcesController");
 const getAllData = async (req, res) => {
   const { leetcodeId, codeforcesId } = req.params;
 
+  const leetcodePromise = leetcodeId
+    ? getAttendedLeetcodeContestData(leetcodeId).catch(() => [])
+    : Promise.resolve([]);
+  const codeforcesPromise = codeforcesId
+    ? getCodeforcesRatingHistory(codeforcesId).catch(() => [])
+    : Promise.resolve([]);
+
   try {
     const [leetcodeContests, codeforcesRatingHistory] = await Promise.all([
-      getAttendedLeetcodeContestData(leetcodeId),
-      getCodeforcesRatingHistory(codeforcesId),
+      leetcodePromise,
+      codeforcesPromise,
     ]);
-
-    if (!Array.isArray(leetcodeContests)) {
-      return res.status(404).json({ error: "Invalid LeetCode username" });
-    }
-
-    if (!Array.isArray(codeforcesRatingHistory)) {
-      return res.status(404).json({ error: "Invalid Codeforces username" });
-    }
 
     res.json({
       leetcodeAttendedContests: leetcodeContests,
@@ -30,35 +29,32 @@ const getAllData = async (req, res) => {
 const getOverallRanking = async (req, res) => {
   const { leetcodeId, codeforcesId } = req.params;
 
+  const leetcodePromise = leetcodeId
+    ? getAttendedLeetcodeContestData(leetcodeId).catch(() => [])
+    : Promise.resolve([]);
+  const codeforcesPromise = codeforcesId
+    ? getCodeforcesRatingHistory(codeforcesId).catch(() => [])
+    : Promise.resolve([]);
+
   try {
     const [leetcodeContests, codeforcesRatingHistory] = await Promise.all([
-      getAttendedLeetcodeContestData(leetcodeId),
-      getCodeforcesRatingHistory(codeforcesId),
+      leetcodePromise,
+      codeforcesPromise,
     ]);
-
-    if (!Array.isArray(leetcodeContests)) {
-      return res.status(404).json({ error: "Invalid LeetCode username" });
-    }
-
-    if (!Array.isArray(codeforcesRatingHistory)) {
-      return res.status(404).json({ error: "Invalid Codeforces username" });
-    }
 
     let totalRanking = 0;
     let totalRating = 0;
     let count = 0;
 
-    // Process LeetCode contests
     leetcodeContests.forEach((contest) => {
-      totalRanking += contest.ranking;
-      totalRating += contest.rating;
+      totalRanking += contest.ranking || 0;
+      totalRating += contest.rating || 0;
       count++;
     });
 
-    // Process Codeforces contests
     codeforcesRatingHistory.forEach((contest) => {
-      totalRanking += contest.rank;
-      totalRating += contest.newRating;
+      totalRanking += contest.rank || 0;
+      totalRating += contest.newRating || 0;
       count++;
     });
 
