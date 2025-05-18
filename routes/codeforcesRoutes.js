@@ -5,6 +5,7 @@ const {
   getCodeforcesContestList,
   getCodeforcesSubmissions,
   getCodeforcesSolvedProblems,
+  getCodeforcesCalenderData,
 } = require("../controllers/codeforcesController");
 
 const router = express.Router();
@@ -23,5 +24,6 @@ router.get("/rating/:username", async (req, res) => {
 
 router.get("/submissions/:username", getCodeforcesSubmissions);
 router.get("/solved/:username", getCodeforcesSolvedProblems);
+router.get("/CalenderData/:username", getCodeforcesCalenderData);
 
 module.exports = router;
