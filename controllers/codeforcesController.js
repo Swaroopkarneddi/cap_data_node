@@ -59,6 +59,36 @@ const getCodeforcesSubmissions = async (req, res) => {
   }
 };
 
+const getCodeforcesCorrectSubmissions = async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const response = await axios.get(
+      `https://codeforces.com/api/user.status?handle=${username}`
+    );
+
+    if (response.data.status !== "OK") {
+      return res.status(404).json({ error: "Invalid Codeforces username" });
+    }
+
+    // Filter only correct submissions (verdict === "OK")
+    const correctSubmissions = response.data.result
+      .filter((submission) => submission.verdict === "OK")
+      .slice(0, 20) // take the latest 20 correct submissions
+      .map((submission) => ({
+        id: submission.id,
+        contestId: submission.contestId,
+        creationTimeSeconds: submission.creationTimeSeconds,
+        name: submission.problem.name,
+        tags: submission.problem.tags,
+      }));
+
+    res.json(correctSubmissions);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const getCodeforcesSolvedProblems = async (req, res) => {
   const { username } = req.params;
   try {
@@ -77,6 +107,43 @@ const getCodeforcesSolvedProblems = async (req, res) => {
         .map((sub) => sub.problem.name)
     );
     res.json(Array.from(solvedProblems));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getCodeforcesSolvedProblemsTags = async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const response = await axios.get(
+      `https://codeforces.com/api/user.status?handle=${username}`
+    );
+
+    if (response.data.status !== "OK") {
+      return res.status(404).json({ error: "Invalid Codeforces username" });
+    }
+
+    // Filter only correct submissions
+    const correctSubmissions = response.data.result.filter(
+      (submission) => submission.verdict === "OK"
+    );
+
+    // Create a map (object) to store tag frequencies
+    const tagCountMap = {};
+
+    correctSubmissions.forEach((submission) => {
+      const tags = submission.problem.tags;
+      tags.forEach((tag) => {
+        if (tag in tagCountMap) {
+          tagCountMap[tag]++;
+        } else {
+          tagCountMap[tag] = 1;
+        }
+      });
+    });
+
+    res.json(tagCountMap);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -192,4 +259,6 @@ module.exports = {
   getCodeforcesSubmissions,
   getCodeforcesSolvedProblems,
   getCodeforcesCalenderData,
+  getCodeforcesCorrectSubmissions,
+  getCodeforcesSolvedProblemsTags,
 };
